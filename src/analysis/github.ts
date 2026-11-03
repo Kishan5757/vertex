@@ -22,7 +22,7 @@ import type {
   CircularDependency,
   FileChange,
 } from "./types";
-import { detectLanguage } from "./languages";
+import { detectLanguage, getLanguageColor } from "./languages";
 import { isIgnored, classifyFile, isSourceOrHeader, groupByCategory } from "./classify";
 import { parseImports, importsToDependencies, detectImportParser } from "./imports";
 import { detectFramework, type FileContent } from "./framework";
@@ -227,12 +227,12 @@ export async function analyzeGithubRepository(
   const langData = (await ghFetch(`/repos/${owner}/${repo}/languages`, signal)) as Record<string, number>;
   const totalBytes = Object.values(langData).reduce((s, v) => s + v, 0) || 1;
   const languages = Object.entries(langData)
-    .map(([lang, bytes]) => {
-      const info = detectLanguage(lang.toLowerCase());
+    .map(([lang, bytes], i) => {
+      const info = detectLanguage(lang);
       return {
         name: lang,
         percentage: Math.round((bytes / totalBytes) * 1000) / 10,
-        color: info?.color ?? "#888",
+        color: info?.color ?? getLanguageColor(lang, i),
       };
     })
     .sort((a, b) => b.percentage - a.percentage);

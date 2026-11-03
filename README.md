@@ -191,24 +191,37 @@ The **Architecture Screen** renders the physical service mesh and module structu
 ---
 
 ### 4.3 Dependencies Screen
-*Location:* `src/workspace/screens/DependenciesScreen.tsx`
+*Locations:* `src/workspace/screens/DependenciesScreen.tsx`, `src/components/FileDependencyGraph.tsx`, `src/components/ExternalDependencyGraph.tsx`, `src/components/CircularDependencyGraph.tsx`
 
-The **Dependencies Screen** exposes the microscopic import graph across internal files, external packages, and dangerous circular cycles.
+The **Dependencies Screen** transforms microscopic import relationships across internal files, third-party libraries, and circular dependency loops into an interactive, graphical visualization format.
 
 #### What it does:
-1. **Live Search & Filter**:
-   - Instantly filters dependencies across all tabs by file path or package name.
-2. **Three Dedicated View Tabs**:
-   - **Internal Dependencies Tab**:
-     - Surfaces exact file-to-file imports (`fileA.ts → fileB.ts`).
-     - Displays the **concrete code evidence string** extracted from the source file (e.g. `import { Brand } from "../components/Brand"`).
-   - **External Dependencies Tab**:
-     - Discovers all third-party libraries imported across the project (e.g. `react`, `d3-force`, `lucide-react`, `torch`, `boost`).
-     - Shows how many files import each library and provides file tags indicating where they are consumed.
-   - **Circular Dependencies Tab**:
-     - Evaluates the dependency graph using cycle detection.
-     - Identifies dangerous loops (e.g. `Cycle 1: serviceA.ts ↔ serviceB.ts ↔ serviceC.ts ↔ serviceA.ts`).
-     - Flags circular imports that cause runtime initialization bugs, memory leaks, and compilation coupling.
+1. **Interactive Dual-Mode View Switcher (`Graph` vs `List`)**:
+   - Toggle seamlessly between a full-featured **Node-Link Visual Graph** (default) and a detailed tabular **List View**.
+2. **Interactive File Dependency Network Graph (`FileDependencyGraph.tsx`)**:
+   - **Physics & Layout**: Powered by D3-force with collision avoidance, calm attraction forces, and drag-and-drop node pinning.
+   - **Directed Edges with Arrowheads**: Clearly illustrates dependency flow (`Source / Importer → Target / Imported File`). Links terminate precisely at the perimeter of target circles.
+   - **Directory-Based Color Clustering**: Automatically clusters and colors nodes by their parent directory (`src/components`, `src/data`, `src/utils`, etc.) with clickable directory filter pills.
+   - **Dynamic Sizing**: Node radius scales proportionally based on total connectivity degree (fan-in + fan-out).
+   - **Interactive Neighborhood Highlighting**:
+     - Hovering a file node isolates its entire direct network:
+       - **Outbound Imports** highlighted in bright Amber.
+       - **Inbound Dependents** highlighted in bright Emerald/Cyan.
+       - All non-connected nodes and links are dimmed for immediate clarity.
+     - Hovering an edge surfaces an evidence tooltip showing the exact `import` / `include` code statement.
+   - **Inspectable File Drawer**: Clicking any node opens a slide-out inspection panel displaying:
+     - Full file path and directory badge.
+     - Outbound imports count and list (with code evidence snippets).
+     - Inbound dependents count and list (with code evidence snippets).
+     - Clickable node links allowing quick navigation across the dependency chain.
+   - **Canvas Navigation Controls**: Zoom In (`+`), Zoom Out (`-`), Fit to View (`⛶`), and Layout Reset (`↺`), plus mouse wheel zooming and click-and-drag panning.
+3. **External Dependencies Visual Graph (`ExternalDependencyGraph.tsx`)**:
+   - Visualizes third-party packages (e.g. `react`, `d3-force`, `express`, `tailwindcss`) as central hub nodes connected to all project files importing them.
+   - Clicking a package node highlights importing files and shows file details.
+4. **Circular Dependencies Visual Graph (`CircularDependencyGraph.tsx`)**:
+   - Detects cycles in the import graph and renders them as animated, circular ring loops with directional red arrows, warning markers, and sequential step-by-step chains.
+5. **Real-Time Search & Highlight**:
+   - Typing in the search input highlights matching file nodes with an active pulse ring while dimming non-matching files.
 
 ---
 

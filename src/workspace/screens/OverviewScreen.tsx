@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useAnalysis } from "../../analysis/AnalysisContext";
 import { EmptyState } from "../EmptyState";
 import type { ModuleRisk } from "../../analysis/types";
+import { getLanguageColor } from "../../analysis/languages";
 
 export function OverviewScreen() {
   const analysis = useAnalysis();
@@ -158,34 +159,46 @@ export function OverviewScreen() {
           <h3 className="mb-3 text-sm font-medium text-secondary">Languages</h3>
           <div className="flex flex-col gap-2">
             <div className="flex h-2 w-full overflow-hidden rounded-full bg-border">
-              {languages.slice(0, 8).map((lang) => (
-                <div
-                  key={lang.name}
-                  title={`${lang.name} ${lang.percentage}%`}
-                  style={{
-                    width: `${lang.percentage}%`,
-                    backgroundColor: lang.color,
-                  }}
-                />
-              ))}
+              {languages.slice(0, 8).map((lang, idx) => {
+                const color =
+                  lang.color && lang.color !== "#888" && lang.color !== "#888888"
+                    ? lang.color
+                    : getLanguageColor(lang.name, idx);
+                return (
+                  <div
+                    key={lang.name}
+                    title={`${lang.name} ${lang.percentage}%`}
+                    style={{
+                      width: `${lang.percentage}%`,
+                      backgroundColor: color,
+                    }}
+                  />
+                );
+              })}
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {languages.slice(0, 6).map((lang) => (
-                <span
-                  key={lang.name}
-                  className="flex items-center gap-1.5 text-xs text-secondary"
-                >
+              {languages.slice(0, 6).map((lang, idx) => {
+                const color =
+                  lang.color && lang.color !== "#888" && lang.color !== "#888888"
+                    ? lang.color
+                    : getLanguageColor(lang.name, idx);
+                return (
                   <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: lang.color }}
-                    aria-hidden="true"
-                  />
-                  {lang.name}
-                  <span className="font-mono text-muted">
-                    {lang.percentage}%
+                    key={lang.name}
+                    className="flex items-center gap-1.5 text-xs text-secondary"
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full shrink-0"
+                      style={{ backgroundColor: color }}
+                      aria-hidden="true"
+                    />
+                    {lang.name}
+                    <span className="font-mono text-muted">
+                      {lang.percentage}%
+                    </span>
                   </span>
-                </span>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
